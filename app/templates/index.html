@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PDFCrafter - PDF Tools</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="icon" type="image/svg+xml" href="/static/images/favicon.svg">
+    <link rel="alternate icon" href="/static/images/favicon.ico">
+</head>
+<body>
+    <nav class="top-nav">
+        <div class="logo">PDFCrafter</div>
+        <div class="nav-links">
+            <a href="https://www.linkedin.com/in/sonu-kumar-singh-sks/" target="_blank" class="profile-link">
+                <img src="/static/images/jpt-logo.svg" alt="JP" class="nav-logo">
+            </a>
+        </div>
+    </nav>
+
+    <div class="tools-nav">
+        <div class="tool-links">
+            <a href="#merge" class="tool-link active" data-tool="merge">
+                <svg viewBox="0 0 24 24" class="tool-icon"><path d="M8 16h8v2H8zm0-4h8v2H8zm6-10H6c-1.1 0-2 .9-2 2v16c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/></svg>
+                Merge PDF
+            </a>
+            <a href="#split" class="tool-link" data-tool="split">
+                <svg viewBox="0 0 24 24" class="tool-icon"><path d="M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 2h7v12h-7V4zM4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6z"/></svg>
+                Split PDF
+            </a>
+            <a href="#images" class="tool-link" data-tool="images">
+                <svg viewBox="0 0 24 24" class="tool-icon"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+                Images to PDF
+            </a>
+            <a href="#text" class="tool-link" data-tool="text">
+                <svg viewBox="0 0 24 24" class="tool-icon"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+                Text to PDF
+            </a>
+        </div>
+    </div>
+
+    <main>
+        <section id="mergeTool" class="tool-section active">
+            <h1>Merge PDF Files</h1>
+            <p class="tool-description">Combine multiple PDF files into a single document</p>
+            <div class="card">
+                <form id="mergeForm" action="/merge-pdfs/" method="post" enctype="multipart/form-data">
+                    <input type="file" id="pdfFiles" name="files" multiple accept="application/pdf" required>
+                    <ul id="fileList" class="file-list"></ul>
+                    <button type="submit">Merge PDFs</button>
+                </form>
+            </div>
+        </section>
+        
+        <section id="splitTool" class="tool-section">
+            <h1>Split PDF</h1>
+            <p class="tool-description">Extract pages from your PDF file</p>
+            <div class="card">
+                <form action="/split-pdf/" method="post" enctype="multipart/form-data">
+                    <input type="file" name="file" accept="application/pdf" required>
+                    <button type="submit">Split PDF</button>
+                </form>
+            </div>
+        </section>
+        
+        <section id="imagesTool" class="tool-section">
+            <h1>Images to PDF</h1>
+            <p class="tool-description">Convert your images into a PDF document</p>
+            <div class="card">
+                <form id="imageForm" action="/images-to-pdf/" method="post" enctype="multipart/form-data">
+                    <input type="file" id="imageFiles" name="files" multiple accept="image/*" required>
+                    <ul id="imageList" class="file-list"></ul>
+                    <button type="submit">Convert Images</button>
+                </form>
+            </div>
+        </section>
+        
+        <section id="textTool" class="tool-section">
+            <h1>Text to PDF</h1>
+            <p class="tool-description">Convert your text into a PDF document</p>
+            <div class="card">
+                <form action="/text-to-pdf/" method="post">
+                    <textarea name="text" rows="6" placeholder="Enter your text here..." required></textarea>
+                    <button type="submit">Convert Text</button>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2025 PDFCrafter. All rights reserved.</p>
+    </footer>
+
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 1. Navigation code
+    const toolLinks = document.querySelectorAll('.tool-link');
+    const toolSections = document.querySelectorAll('.tool-section');
+
+    function showTool(toolId) {
+        toolSections.forEach(section => {
+            section.style.display = 'none';
+            section.classList.remove('active');
+        });
+        toolLinks.forEach(link => {
+            link.classList.remove('active');
+        });
+
+        const targetSection = document.getElementById(toolId + 'Tool');
+        const targetLink = document.querySelector(`[data-tool="${toolId}"]`);
+        
+        if (targetSection && targetLink) {
+            targetSection.style.display = 'block';
+            targetSection.classList.add('active');
+            targetLink.classList.add('active');
+        }
+    }
+
+    // Handle navigation clicks
+    toolLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const tool = link.dataset.tool;
+            showTool(tool);
+            history.pushState({}, '', `#${tool}`);
+        });
+    });
+
+    // Handle initial load and browser back/forward
+    function handleHash() {
+        const hash = window.location.hash.slice(1) || 'merge';
+        showTool(hash);
+    }
+
+    window.addEventListener('load', handleHash);
+    window.addEventListener('hashchange', handleHash);
+
+    // 2. Drag and Drop Setup - Only define once
+    function setupDragAndDrop(inputId, listId, filesArray) {
+        const input = document.getElementById(inputId);
+        const list = document.getElementById(listId);
+        let files = filesArray;
+
+        function renderList() {
+            if (!list) return;
+            list.innerHTML = '';
+            files.forEach((file, idx) => {
+                const li = document.createElement('li');
+                li.textContent = file.name;
+                li.draggable = true;
+                li.dataset.idx = idx;
+                setupDragListeners(li, files, renderList);
+                list.appendChild(li);
+            });
+        }
+
+        if (input) {
+            input.addEventListener('change', (e) => {
+                files = Array.from(e.target.files);
+                renderList();
+            });
+        }
+
+        return { files, renderList };
+    }
+
+    // 3. Setup file handlers
+    const pdfDrag = setupDragAndDrop('pdfFiles', 'fileList', []);
+    const imageDrag = setupDragAndDrop('imageFiles', 'imageList', []);
+
+    // 4. Signature handling - Only initialize once
+    const canvas = document.getElementById('signatureCanvas');
+    const ctx = canvas?.getContext('2d');
+    const pdfPreview = document.getElementById('pdfPreview');
+    let signaturePreview = null;
+
+    if (ctx) {
+        initializeSignatureCanvas(ctx, canvas, pdfPreview);
+    }
+
+    // 5. Form submissions
+    setupFormSubmissions(pdfDrag, imageDrag);
+});
+
+// Helper functions - Define outside main listener to avoid duplication
+function setupDragListeners(li, files, renderList) {
+    li.addEventListener('dragstart', (ev) => {
+        ev.dataTransfer.setData('text/plain', ev.target.dataset.idx);
+        ev.target.classList.add('dragging');
+    });
+
+    li.addEventListener('dragend', (ev) => {
+        ev.target.classList.remove('dragging');
+    });
+
+    li.addEventListener('dragover', (ev) => {
+        ev.preventDefault();
+        ev.target.classList.add('dragover');
+    });
+
+    li.addEventListener('dragleave', (ev) => {
+        ev.target.classList.remove('dragover');
+    });
+
+    li.addEventListener('drop', (ev) => {
+        ev.preventDefault();
+        ev.target.classList.remove('dragover');
+        const fromIdx = parseInt(ev.dataTransfer.getData('text/plain'));
+        const toIdx = parseInt(ev.target.dataset.idx);
+        if (fromIdx !== toIdx) {
+            const moved = files.splice(fromIdx, 1)[0];
+            files.splice(toIdx, 0, moved);
+            renderList();
+        }
+    });
+}
+
+function initializeSignatureCanvas(ctx, canvas, pdfPreview) {
+    let isDrawing = false;
+    let lastX = 0;
+    let lastY = 0;
+
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    // Drawing handlers
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('mouseout', stopDrawing);
+
+    function startDrawing(e) {
+        isDrawing = true;
+        const rect = canvas.getBoundingClientRect();
+        lastX = e.clientX - rect.left;
+        lastY = e.clientY - rect.top;
+    }
+
+    function draw(e) {
+        if (!isDrawing) return;
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        ctx.beginPath();
+        ctx.moveTo(lastX, lastY);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+
+        lastX = x;
+        lastY = y;
+    }
+
+    function stopDrawing() {
+        isDrawing = false;
+    }
+
+    // Button handlers
+    setupSignatureButtons(ctx, canvas, pdfPreview);
+}
+
+function setupSignatureButtons(ctx, canvas, pdfPreview) {
+    const clearButton = document.getElementById('clearSignature');
+    const addButton = document.getElementById('addToDocument');
+    const signForm = document.getElementById('signForm');
+
+    if (clearButton) {
+        clearButton.addEventListener('click', () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        });
+    }
+
+    if (addButton) {
+        addButton.addEventListener('click', () => {
+            handleAddToDocument(canvas, pdfPreview);
+        });
+    }
+
+    if (signForm) {
+        signForm.addEventListener('submit', (e) => {
+            handleSignatureSubmit(e, canvas, pdfPreview);
+        });
+    }
+}
+
+function handleAddToDocument(canvas, pdfPreview) {
+    const signatureData = canvas.toDataURL();
+    
+    // Remove existing preview if any
+    if (window.signaturePreview) {
+        window.signaturePreview.remove();
+    }
+
+    // Create new signature preview
+    const preview = document.createElement('div');
+    preview.className = 'signature-preview';
+    preview.innerHTML = `<img src="${signatureData}" style="max-width: 200px;">`;
+    pdfPreview.appendChild(preview);
+    
+    // Store reference to preview
+    window.signaturePreview = preview;
+
+    // Make signature draggable
+    let isDragging = false;
+    let currentX;
+    let currentY;
+
+    preview.addEventListener('mousedown', function(e) {
+        isDragging = true;
+        currentX = e.clientX - preview.offsetLeft;
+        currentY = e.clientY - preview.offsetTop;
+    });
+
+    document.addEventListener('mousemove', function(e) {
+        if (!isDragging) return;
+        
+        const newX = e.clientX - currentX;
+        const newY = e.clientY - currentY;
+        
+        // Get bounds
+        const bounds = pdfPreview.getBoundingClientRect();
+        const previewBounds = preview.getBoundingClientRect();
+        
+        // Keep signature within preview bounds
+        preview.style.left = `${Math.max(0, Math.min(newX, bounds.width - previewBounds.width))}px`;
+        preview.style.top = `${Math.max(0, Math.min(newY, bounds.height - previewBounds.height))}px`;
+
+        // Update hidden inputs
+        const x = (newX / bounds.width) * 100;
+        const y = ((bounds.height - newY) / bounds.height) * 100;
+        document.getElementById('signatureX').value = x;
+        document.getElementById('signatureY').value = y;
+        document.getElementById('signatureData').value = signatureData;
+    });
+
+    document.addEventListener('mouseup', function() {
+        isDragging = false;
+    });
+}
+
+function setupFormSubmissions(pdfDrag, imageDrag) {
+    const mergeForm = document.getElementById('mergeForm');
+    const imageForm = document.getElementById('imageForm');
+
+    if (mergeForm) {
+        mergeForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            handleMergeSubmit(pdfDrag);
+        });
+    }
+
+    if (imageForm) {
+        imageForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            handleImageSubmit(imageDrag);
+        });
+    }
+}
+    </script>
+</body>
+</html>

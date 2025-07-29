@@ -1,0 +1,40 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" class="brand-icon">
+    <!-- Background gradient -->
+    <defs>
+        <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#4f46e5"/>
+            <stop offset="100%" style="stop-color:#7c3aed"/>
+        </linearGradient>
+        
+        <!-- Subtle texture pattern -->
+        <pattern id="texture" width="512" height="512" patternUnits="userSpaceOnUse">
+            <rect width="512" height="512" fill="url(#logoGradient)"/>
+            <rect width="512" height="512" fill="white" opacity="0.02"/>
+        </pattern>
+    </defs>
+
+    <!-- Main circle with gradient and texture -->
+    <circle cx="256" cy="256" r="240" fill="url(#texture)"/>
+    
+    <!-- Subtle ring for depth -->
+    <circle cx="256" cy="256" r="230" 
+        fill="none" 
+        stroke="rgba(255,255,255,0.2)" 
+        stroke-width="2"/>
+
+    <!-- Letters with enhanced styling -->
+    <text x="256" y="336" 
+        font-family="Helvetica, Arial, sans-serif" 
+        font-size="200" 
+        font-weight="700" 
+        fill="white" 
+        text-anchor="middle"
+        letter-spacing="8">
+        JPT
+    </text>
+
+    <!-- Subtle highlight -->
+    <circle cx="180" cy="180" r="140" 
+        fill="white" 
+        opacity="0.05"/>
+</svg>

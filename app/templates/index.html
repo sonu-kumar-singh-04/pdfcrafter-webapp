@@ -139,29 +139,29 @@ document.addEventListener('DOMContentLoaded', function() {
     function setupDragAndDrop(inputId, listId, filesArray) {
         const input = document.getElementById(inputId);
         const list = document.getElementById(listId);
-        let files = filesArray;
+        const fileHandler = { files: filesArray };
 
         function renderList() {
             if (!list) return;
             list.innerHTML = '';
-            files.forEach((file, idx) => {
+            fileHandler.files.forEach((file, idx) => {
                 const li = document.createElement('li');
                 li.textContent = file.name;
                 li.draggable = true;
                 li.dataset.idx = idx;
-                setupDragListeners(li, files, renderList);
+                setupDragListeners(li, fileHandler.files, renderList);
                 list.appendChild(li);
             });
         }
 
         if (input) {
             input.addEventListener('change', (e) => {
-                files = Array.from(e.target.files);
+                fileHandler.files = Array.from(e.target.files);
                 renderList();
             });
         }
 
-        return { files, renderList };
+        return fileHandler;
     }
 
     // 3. Setup file handlers
@@ -287,7 +287,7 @@ function setupSignatureButtons(ctx, canvas, pdfPreview) {
 
 function handleAddToDocument(canvas, pdfPreview) {
     const signatureData = canvas.toDataURL();
-    
+
     // Remove existing preview if any
     if (window.signaturePreview) {
         window.signaturePreview.remove();
@@ -298,7 +298,7 @@ function handleAddToDocument(canvas, pdfPreview) {
     preview.className = 'signature-preview';
     preview.innerHTML = `<img src="${signatureData}" style="max-width: 200px;">`;
     pdfPreview.appendChild(preview);
-    
+
     // Store reference to preview
     window.signaturePreview = preview;
 
@@ -315,14 +315,14 @@ function handleAddToDocument(canvas, pdfPreview) {
 
     document.addEventListener('mousemove', function(e) {
         if (!isDragging) return;
-        
+
         const newX = e.clientX - currentX;
         const newY = e.clientY - currentY;
-        
+
         // Get bounds
         const bounds = pdfPreview.getBoundingClientRect();
         const previewBounds = preview.getBoundingClientRect();
-        
+
         // Keep signature within preview bounds
         preview.style.left = `${Math.max(0, Math.min(newX, bounds.width - previewBounds.width))}px`;
         preview.style.top = `${Math.max(0, Math.min(newY, bounds.height - previewBounds.height))}px`;
@@ -357,6 +357,82 @@ function setupFormSubmissions(pdfDrag, imageDrag) {
             handleImageSubmit(imageDrag);
         });
     }
+}
+
+function handleMergeSubmit(pdfDrag) {
+    const formData = new FormData();
+    pdfDrag.files.forEach(file => {
+        formData.append('files', file);
+    });
+
+    if (pdfDrag.files.length === 0) {
+        alert('Please select at least one PDF file to merge.');
+        return;
+    }
+
+    fetch('/merge-pdfs/', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (response.ok) {
+            return response.blob();
+        }
+        throw new Error('Network response was not ok');
+    })
+    .then(blob => {
+        // Create download link
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'merged.pdf';
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while merging PDFs.');
+    });
+}
+
+function handleImageSubmit(imageDrag) {
+    const formData = new FormData();
+    imageDrag.files.forEach(file => {
+        formData.append('files', file);
+    });
+
+    if (imageDrag.files.length === 0) {
+        alert('Please select at least one image file to convert.');
+        return;
+    }
+
+    fetch('/images-to-pdf/', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (response.ok) {
+            return response.blob();
+        }
+        throw new Error('Network response was not ok');
+    })
+    .then(blob => {
+        // Create download link
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'images.pdf';
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while converting images to PDF.');
+    });
 }
     </script>
 </body>
